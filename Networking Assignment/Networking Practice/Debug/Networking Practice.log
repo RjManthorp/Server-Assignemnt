@@ -1,0 +1,4 @@
+﻿  Main.cpp
+c:\users\administrator\desktop\networking practice\networking practice\main.cpp(73): warning C4715: 'processClient': not all control paths return a value
+  Networking Practice.vcxproj -> C:\Users\Administrator\Desktop\Networking Practice\Debug\Networking Practice.exe
+  Networking Practice.vcxproj -> C:\Users\Administrator\Desktop\Networking Practice\Debug\Networking Practice.pdb (Full PDB)
