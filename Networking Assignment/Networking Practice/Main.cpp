@@ -1,9 +1,13 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <WinSock2.h>
 #include <thread>
 #include <vector>
 #include <string>
+#include <ctime>
+#include <algorithm>
 #pragma comment(lib, "Ws2_32.lib")
+
 
 const unsigned short PORT = 1111;
 const int MAX_CLIENTS = 5;
@@ -13,40 +17,57 @@ struct client_type // Track individual clients
 {
 	int id;
 	SOCKET socket;
+	std::string userName;
 };
+
+void clean(std::string &message) 
+{
+	message.erase(std::remove(message.begin(), message.end(), '\n'), message.end());
+	message.erase(std::remove(message.begin(), message.end(), '\r'), message.end());
+
+}
 
 int processClient(client_type &new_client, std::vector<client_type> &client_array, std::thread &thread)
 {
-
+	time_t now = time(0);
+	char* dt = ctime(&now);
 	std::string msg = "";
+
 	char tempmsg[DEFAULT_BUFLEN];
+
 
 	while (1)
 	{
 		memset(tempmsg, 0, DEFAULT_BUFLEN);
+
 		int result = recv(new_client.socket, tempmsg, DEFAULT_BUFLEN, 0);
 
 		if (result != SOCKET_ERROR)
 		{
-			if (strcmp("", tempmsg))
-				msg = " Client #" + std::to_string(new_client.id) + ": " + tempmsg;
+			std::string message = tempmsg;
+			clean(message);
 
-			for (int i = 0; i < MAX_CLIENTS; i++)
+			if (message.length() > 0)
 			{
-				if (client_array[i].socket != INVALID_SOCKET)
+				msg = "Client #" + std::to_string(new_client.id) +": " /*+ "[" + dt + "]"*/ + message;
+
+				for (int i = 0; i < MAX_CLIENTS; i++)
 				{
-					if (new_client.id != i)
+					if (client_array[i].socket != INVALID_SOCKET)
 					{
-						result = send(client_array[i].socket,
-							msg.c_str(),
-							strlen(msg.c_str()), 0);
+						if (new_client.id != i)
+						{
+							result = send(client_array[i].socket,
+								msg.c_str(),
+								strlen(msg.c_str()), 0);
+						}
 					}
 				}
 			}
 		}
 		else
 		{
-			msg = " Client #" + std::to_string(new_client.id) + " disconnected";
+			msg = "Client #" + std::to_string(new_client.id) + " disconnected";
 			std::cout << msg << std::endl;
 			closesocket(new_client.socket);
 			closesocket(client_array[new_client.id].socket);
@@ -72,19 +93,23 @@ int processClient(client_type &new_client, std::vector<client_type> &client_arra
 	}
 }
 
-
-
 int main()
 {
 	printf("******************************************\n");
 	printf("**               Chat Room              **\n");
 	printf("******************************************\n");
+	printf("\n");
 	system("color 4f");
+	
+	time_t now = time(0);
+	char* dt = ctime(&now);
+	std::cout << "Time of login of the server - " << dt << std::endl;
+
 
 	WORD wVersionRequested = MAKEWORD(2, 2); // main function for initializing winsock
 	WSADATA wsaData;
 
-	printf("Initializing WinSock..."); // wsas startup returns anything but 0 the end it
+	printf("Initializing WinSock...\n"); // wsas startup returns anything but 0 the end it
 	int error = WSAStartup(wVersionRequested, &wsaData);
 
 	if (error != 0)
@@ -177,3 +202,4 @@ int main()
 	WSACleanup();
 	return 0;
 }
+
