@@ -1,3 +1,4 @@
+
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <WinSock2.h>
@@ -6,12 +7,18 @@
 #include <string>
 #include <ctime>
 #include <algorithm>
+#include <sstream>
 #pragma comment(lib, "Ws2_32.lib")
 
 
 const unsigned short PORT = 1111;
 const int MAX_CLIENTS = 5;
 const int DEFAULT_BUFLEN = 512;
+
+char UsernameChar[DEFAULT_BUFLEN] = "";
+int StartSpace = 0;
+
+std::string clientName = "Client #";
 
 struct client_type // Track individual clients
 {
@@ -24,7 +31,25 @@ void clean(std::string &message)
 {
 	message.erase(std::remove(message.begin(), message.end(), '\n'), message.end());
 	message.erase(std::remove(message.begin(), message.end(), '\r'), message.end());
+}
 
+std::string stringSplit(char tempmsg[], int StartSpace)
+{
+	char UsernameChar[DEFAULT_BUFLEN] = "";
+	for (int i = StartSpace; i<DEFAULT_BUFLEN; i++)
+	{
+		if (tempmsg[i] == 0)
+		{
+			break;
+		}
+		UsernameChar[i - 9] = tempmsg[i];
+	}
+	std::stringstream UsenameConvert;
+	std::string UsernameString;
+
+	UsenameConvert << UsernameChar;
+	UsenameConvert >> UsernameString;
+	return UsernameString;
 }
 
 int processClient(client_type &new_client, std::vector<client_type> &client_array, std::thread &thread)
@@ -32,34 +57,48 @@ int processClient(client_type &new_client, std::vector<client_type> &client_arra
 	time_t now = time(0);
 	char* dt = ctime(&now);
 	std::string msg = "";
-
 	char tempmsg[DEFAULT_BUFLEN];
-
 
 	while (1)
 	{
 		memset(tempmsg, 0, DEFAULT_BUFLEN);
-
 		int result = recv(new_client.socket, tempmsg, DEFAULT_BUFLEN, 0);
 
 		if (result != SOCKET_ERROR)
 		{
 			std::string message = tempmsg;
 			clean(message);
-
-			if (message.length() > 0)
+			if (!(tempmsg[0] == 13 && tempmsg[1] == 10 && tempmsg[2] == 0))
 			{
-				msg = "Client #" + std::to_string(new_client.id) +": " /*+ "[" + dt + "]"*/ + message;
-
-				for (int i = 0; i < MAX_CLIENTS; i++)
+				if (message.length() > 0)
 				{
-					if (client_array[i].socket != INVALID_SOCKET)
+					if (message[0] == 47 
+						)
 					{
-						if (new_client.id != i)
+						int test = strncmp("/setname", tempmsg, 8);
+						if (strncmp("/setname", tempmsg, 8)==0)
 						{
-							result = send(client_array[i].socket,
-								msg.c_str(),
-								strlen(msg.c_str()), 0);
+							std::string Username = stringSplit(tempmsg, 9);
+							std::cout << Username << std::endl;
+							new_client.userName = Username;
+						}
+						msg = "Comand sent\r\n";
+						send(new_client.socket, msg.c_str(), strlen(msg.c_str()), 0);
+					}
+					else
+					{
+						msg = new_client.userName + ": " /*+ "[" + dt + "]"*/ + message + "\r\n";
+						for (int i = 0; i < MAX_CLIENTS; i++)
+						{
+							if (client_array[i].socket != INVALID_SOCKET)
+							{
+								if (new_client.id != i)
+								{
+									result = send(client_array[i].socket,
+										msg.c_str(),
+										strlen(msg.c_str()), 0);
+								}
+							}
 						}
 					}
 				}
