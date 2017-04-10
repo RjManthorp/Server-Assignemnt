@@ -1,4 +1,5 @@
 ﻿  Main.cpp
-c:\users\administrator\desktop\server-assignemnt\networking assignment\networking practice\main.cpp(158): warning C4715: 'processClient': not all control paths return a value
+c:\users\administrator\desktop\server-assignemnt\networking assignment\networking practice\main.cpp(85): warning C4554: '&': check operator precedence for possible error; use parentheses to clarify precedence
+c:\users\administrator\desktop\server-assignemnt\networking assignment\networking practice\main.cpp(146): warning C4715: 'processClient': not all control paths return a value
   Networking Practice.vcxproj -> C:\Users\Administrator\Desktop\Server-Assignemnt\Networking Assignment\Debug\Networking Practice.exe
   Networking Practice.vcxproj -> C:\Users\Administrator\Desktop\Server-Assignemnt\Networking Assignment\Debug\Networking Practice.pdb (Full PDB)

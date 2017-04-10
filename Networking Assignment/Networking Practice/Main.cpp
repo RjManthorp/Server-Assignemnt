@@ -1,4 +1,3 @@
-
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <WinSock2.h>
@@ -18,6 +17,10 @@ const int DEFAULT_BUFLEN = 512;
 char UsernameChar[DEFAULT_BUFLEN] = "";
 int StartSpace = 0;
 
+const int USERNAME_MIN_LENGTH = 10;
+const int USERNAME_MAX_LENGTH = 30;
+
+
 std::string clientName = "Client #";
 
 struct client_type // Track individual clients
@@ -27,7 +30,7 @@ struct client_type // Track individual clients
 	std::string userName;
 };
 
-void clean(std::string &message) 
+void clean(std::string &message)
 {
 	message.erase(std::remove(message.begin(), message.end(), '\n'), message.end());
 	message.erase(std::remove(message.begin(), message.end(), '\r'), message.end());
@@ -72,18 +75,28 @@ int processClient(client_type &new_client, std::vector<client_type> &client_arra
 			{
 				if (message.length() > 0)
 				{
-					if (message[0] == 47 
-						)
+					if (message[0] == 47)
 					{
 						int test = strncmp("/setname", tempmsg, 8);
-						if (strncmp("/setname", tempmsg, 8)==0)
+
+						if (strncmp("/setname", tempmsg, 8) == 0)
 						{
-							std::string Username = stringSplit(tempmsg, 9);
-							std::cout << Username << std::endl;
-							new_client.userName = Username;
+							int length = std::string(tempmsg).length();
+							if (length > USERNAME_MIN_LENGTH & length < USERNAME_MAX_LENGTH)
+							{
+								std::string Username = stringSplit(tempmsg, 9);
+								std::cout << Username << std::endl;
+								new_client.userName = Username;
+								msg = Username;
+								send(new_client.socket, msg.c_str(), strlen(msg.c_str()), 0);
+							}
+							else
+							{
+								std::cout << " Illegal Username" << std::endl;
+								msg = "Illegal Username\r\n";
+								send(new_client.socket, msg.c_str(), strlen(msg.c_str()), 0);
+							}
 						}
-						msg = "Comand sent\r\n";
-						send(new_client.socket, msg.c_str(), strlen(msg.c_str()), 0);
 					}
 					else
 					{
@@ -139,7 +152,7 @@ int main()
 	printf("******************************************\n");
 	printf("\n");
 	system("color 4f");
-	
+
 	time_t now = time(0);
 	char* dt = ctime(&now);
 	std::cout << "Time of login of the server - " << dt << std::endl;
@@ -181,7 +194,7 @@ int main()
 		printf("Failed to set socket to listen with error code: %d", WSAGetLastError());
 		return 0;
 	}
-	
+
 
 
 	std::vector<client_type> clients(MAX_CLIENTS);// vector to store clients and an array of threads to process them
