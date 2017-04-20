@@ -77,7 +77,14 @@ int processClient(client_type &new_client, std::vector<client_type> &client_arra
 				{
 					if (message[0] == 47)
 					{
-						int test = strncmp("/setname", tempmsg, 8);
+						int ban = strncmp("/ban", tempmsg, 4);
+						if (strncmp("/ban", /* Client that is in the client array */tempmsg, 4) == 0)
+						{
+							std::cout << "ban command sent" << std::endl;
+							// set the named client socket to null and username to null
+						}
+
+						int setname = strncmp("/setname", tempmsg, 8);
 
 						if (strncmp("/setname", tempmsg, 8) == 0)
 						{
