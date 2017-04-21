@@ -24,5 +24,15 @@ namespace CSharpClient
             var validPort = int.TryParse(portText.Text, out port);
             return IPAddress.TryParse(ipAddress, out ip) && validPort;
         }
+
+        private void CancelBtn_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ConnectBtn_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

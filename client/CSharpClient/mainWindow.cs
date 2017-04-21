@@ -27,14 +27,10 @@ namespace CSharpClient
 
         private static string RESPONSE = string.Empty;
         private static readonly ManualResetEvent receiveDone = new ManualResetEvent(false);
-
         private IPAddress serverAddress;
         private int serverPort;
-
         private IPEndPoint endPoint;
-
         private Socket client;
-
         private StateObject state;
 
         public mainWindow()
@@ -46,6 +42,7 @@ namespace CSharpClient
         private void connectToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var connectForm = new connectWindow();
+            var errorForm = new ServerNotFoundWindow();
 
             if (connectForm.ShowDialog() != DialogResult.OK)
                 return;
@@ -53,9 +50,11 @@ namespace CSharpClient
             var validAddress = connectForm.GetAddress(out serverAddress, out serverPort);
 
             if (!validAddress)
-                return;
+            {
+                errorForm.ShowDialog();
+            
+            }
 
-            Disconnect();
 
             endPoint = new IPEndPoint(serverAddress, serverPort);
             client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -120,6 +119,8 @@ namespace CSharpClient
             Disconnect();
         }
 
+
+    
         private void sendBtn_Click(object sender, EventArgs e)
         {
             if (!client.Connected)

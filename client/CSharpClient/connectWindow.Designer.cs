@@ -44,6 +44,7 @@
             this.ConnectBtn.TabIndex = 0;
             this.ConnectBtn.Text = "Connect";
             this.ConnectBtn.UseVisualStyleBackColor = true;
+            this.ConnectBtn.Click += new System.EventHandler(this.ConnectBtn_Click);
             // 
             // CancelBtn
             // 
@@ -54,6 +55,7 @@
             this.CancelBtn.TabIndex = 1;
             this.CancelBtn.Text = "Cancel";
             this.CancelBtn.UseVisualStyleBackColor = true;
+            this.CancelBtn.Click += new System.EventHandler(this.CancelBtn_Click);
             // 
             // ipAddressText
             // 
@@ -62,7 +64,7 @@
             this.ipAddressText.Name = "ipAddressText";
             this.ipAddressText.Size = new System.Drawing.Size(117, 20);
             this.ipAddressText.TabIndex = 2;
-            this.ipAddressText.Text = "Server Address";
+            this.ipAddressText.Text = "192.168.0.8";
             // 
             // portText
             // 
@@ -71,7 +73,7 @@
             this.portText.Name = "portText";
             this.portText.Size = new System.Drawing.Size(48, 20);
             this.portText.TabIndex = 3;
-            this.portText.Text = "Port";
+            this.portText.Text = "1111";
             // 
             // connectWindow
             // 
