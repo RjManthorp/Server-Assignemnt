@@ -33,32 +33,34 @@ namespace CSharpClient
         private Socket client;
         private StateObject state;
 
+        public string Usernames = "UserNames";
+
         public mainWindow()
         {
             InitializeComponent();
+           
 
         }
-
+        //192.168.56.1
         private void connectToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var connectForm = new connectWindow();
-            var errorForm = new ServerNotFoundWindow();
+            var connectForm = new connectWindow(); //Create a var for a new connect window
+            var errorForm = new ServerNotFoundWindow(); //create a var for a new error window
 
             if (connectForm.ShowDialog() != DialogResult.OK)
                 return;
 
             var validAddress = connectForm.GetAddress(out serverAddress, out serverPort);
 
-            if (!validAddress)
+            if (!validAddress) // if the address is enetered incorrectly 
             {
-                errorForm.ShowDialog();
+                errorForm.ShowDialog(); // show the error window
             
             }
 
 
             endPoint = new IPEndPoint(serverAddress, serverPort);
             client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
             client.Connect(endPoint);
 
             if (!client.Connected) return;
@@ -71,14 +73,19 @@ namespace CSharpClient
                 new AsyncCallback(ReceiveCallback), state);
         }
 
-        public delegate void UpdateMessageBox();
+        public void UpdateUsers() 
+        {
+            Usernames = "Test";
 
+           // userList.Items.Add(Usernames);
+        }
+
+        public delegate void UpdateMessageBox();
         public void UpdateMessages()
         {
             if (messageText.InvokeRequired)
             {
-                messageText.Invoke((MethodInvoker)delegate { messageText.AppendText(state.Sb.ToString() + "\n"); });
-
+                messageText.Invoke((MethodInvoker)delegate{messageText.AppendText(DateTime.Now.ToString("hh:mm:ss tt : ", System.Globalization.DateTimeFormatInfo.InvariantInfo) + state.Sb.ToString() + "\n"); });
                 state.Sb.Clear();
             }
         }
@@ -95,8 +102,8 @@ namespace CSharpClient
             {
                 // There might be more data, so store the data received so far.  
                 stateObject.Sb.Append(Encoding.ASCII.GetString(stateObject.Buffer, 0, bytesRead));
-
                 UpdateMessages();
+               
             }
 
             // Get the rest of the data.  
@@ -126,11 +133,18 @@ namespace CSharpClient
             if (!client.Connected)
                 return;
 
+            UpdateUsers();
+
             var msg = messageBox.Text;
 
             var msgBytes = Encoding.ASCII.GetBytes(msg);
 
             client.Send(msgBytes);
+
+            messageBox.Clear();
         }
     }
 }
+
+
+

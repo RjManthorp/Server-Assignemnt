@@ -64,7 +64,7 @@
             this.ipAddressText.Name = "ipAddressText";
             this.ipAddressText.Size = new System.Drawing.Size(117, 20);
             this.ipAddressText.TabIndex = 2;
-            this.ipAddressText.Text = "192.168.0.8";
+            this.ipAddressText.Text = "127.0.0.1";
             // 
             // portText
             // 
@@ -77,9 +77,10 @@
             // 
             // connectWindow
             // 
+            this.AcceptButton = this.ConnectBtn;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.Cyan;
+            this.BackColor = System.Drawing.SystemColors.ActiveBorder;
             this.CancelButton = this.CancelBtn;
             this.ClientSize = new System.Drawing.Size(209, 89);
             this.Controls.Add(this.portText);

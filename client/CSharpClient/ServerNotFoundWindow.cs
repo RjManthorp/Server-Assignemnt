@@ -17,8 +17,14 @@ namespace CSharpClient
             InitializeComponent();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e) 
         {
+         
+            var connectForm = new connectWindow();
+
+            this.Dispose(); // close the error window
+            connectForm.ShowDialog(); // show the connection window
+            
 
         }
     }

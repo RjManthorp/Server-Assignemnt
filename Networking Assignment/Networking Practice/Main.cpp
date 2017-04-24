@@ -7,7 +7,10 @@
 #include <ctime>
 #include <algorithm>
 #include <sstream>
+#include <iterator>
+
 #pragma comment(lib, "Ws2_32.lib")
+
 
 
 const unsigned short PORT = 1111;
@@ -36,23 +39,24 @@ void clean(std::string &message)
 	message.erase(std::remove(message.begin(), message.end(), '\r'), message.end());
 }
 
-std::string stringSplit(char tempmsg[], int StartSpace)
+template<typename Out>
+void split(const std::string &s, char delim, Out result)
 {
-	char UsernameChar[DEFAULT_BUFLEN] = "";
-	for (int i = StartSpace; i<DEFAULT_BUFLEN; i++)
+	std::stringstream ss;
+	ss.str(s);
+	std::string item;
+	while (std::getline(ss, item, delim))
 	{
-		if (tempmsg[i] == 0)
-		{
-			break;
-		}
-		UsernameChar[i - 9] = tempmsg[i];
+		*(result++) = item;
 	}
-	std::stringstream UsenameConvert;
-	std::string UsernameString;
+}
 
-	UsenameConvert << UsernameChar;
-	UsenameConvert >> UsernameString;
-	return UsernameString;
+
+std::vector<std::string> split(const std::string &s, char delim)
+{
+	std::vector<std::string> elems;
+	split(s, delim, std::back_inserter(elems));
+	return elems;
 }
 
 int processClient(client_type &new_client, std::vector<client_type> &client_array, std::thread &thread)
@@ -77,13 +81,41 @@ int processClient(client_type &new_client, std::vector<client_type> &client_arra
 				{
 					if (message[0] == 47)
 					{
+						////////////////////////////////////////
 						int ban = strncmp("/ban", tempmsg, 4);
-						if (strncmp("/ban", /* Client that is in the client array */tempmsg, 4) == 0)
+						if (strncmp("/ban", tempmsg, 4) == 0)
 						{
-							std::cout << "ban command sent" << std::endl;
-							// set the named client socket to null and username to null
-						}
+							std::vector<std::string> splitString = split(tempmsg, ' ');
+							std::string BanName = splitString.back(); //passes through part of the string after a "space" 
+						
+							{
+								for (int i = 0; i < MAX_CLIENTS; i++)
+								{
+									if (client_array[i].userName == BanName)
+									{
+										std::cout << BanName << " banned" << std::endl;
+										send(new_client.socket, BanName.c_str(), strlen(clientName.c_str()), 0);
 
+										closesocket(client_array[i].socket);
+									}
+								}
+							}
+							
+						}
+						/////////////////////////////////////////
+						int help = strncmp("/help", tempmsg, 5);
+						if (strncmp("/help", tempmsg, 5) == 0)
+						{
+							std::vector<std::string> splitString = split(tempmsg, ' ');
+
+							{
+								std::string helpCommand = "Commands~\n " "/setname (name) \n" "/ban (user) \n";
+								msg = helpCommand;
+								send(new_client.socket, msg.c_str(), strlen(msg.c_str()), 0);	
+							}
+
+						}
+						////////////////////////////////////////
 						int setname = strncmp("/setname", tempmsg, 8);
 
 						if (strncmp("/setname", tempmsg, 8) == 0)
@@ -91,16 +123,18 @@ int processClient(client_type &new_client, std::vector<client_type> &client_arra
 							int length = std::string(tempmsg).length();
 							if (length > USERNAME_MIN_LENGTH & length < USERNAME_MAX_LENGTH)
 							{
-								std::string Username = stringSplit(tempmsg, 9);
-								std::cout << Username << std::endl;
+								std::vector<std::string> splitString = split(tempmsg, ' ');
+								std::string Username = splitString.back();
+								if (Username !="/setname")
+								std::cout << Username << " has joined the room" << std::endl;
 								new_client.userName = Username;
-								msg = Username;
+								msg = "Hello " + Username;
 								send(new_client.socket, msg.c_str(), strlen(msg.c_str()), 0);
 							}
 							else
 							{
 								std::cout << " Illegal Username" << std::endl;
-								msg = "Illegal Username\r\n";
+								msg = "Illegal Username - Username but be at least 2 characters and no more than 30 characters\r\n";
 								send(new_client.socket, msg.c_str(), strlen(msg.c_str()), 0);
 							}
 						}
@@ -108,6 +142,8 @@ int processClient(client_type &new_client, std::vector<client_type> &client_arra
 					else
 					{
 						msg = new_client.userName + ": " /*+ "[" + dt + "]"*/ + message + "\r\n";
+						send(new_client.socket, message.c_str(), strlen(message.c_str()), 0);
+						
 						for (int i = 0; i < MAX_CLIENTS; i++)
 						{
 							if (client_array[i].socket != INVALID_SOCKET)
@@ -126,7 +162,7 @@ int processClient(client_type &new_client, std::vector<client_type> &client_arra
 		}
 		else
 		{
-			msg = "Client #" + std::to_string(new_client.id) + " disconnected";
+			msg = (new_client.userName) + " has disconnected";
 			std::cout << msg << std::endl;
 			closesocket(new_client.socket);
 			closesocket(client_array[new_client.id].socket);
